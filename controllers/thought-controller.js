@@ -30,6 +30,8 @@ module.exports = {
     try {
       const thought = await Thought.create(req.body);
       res.json(thought);
+      //find user update
+      // make a variable follow line 31
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -44,7 +46,7 @@ module.exports = {
         res.status(404).json({ message: 'No course with that ID' });
       }
       res.json({message: 'thought has been deleted'})
-
+//update the user
       // await User.deleteMany({ _id: { $in: thought.User } });
       // res.json({ message: 'Course and students deleted!' });
     } catch (err) {
