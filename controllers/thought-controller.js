@@ -10,6 +10,22 @@ module.exports = {
       res.status(500).json(err);
     }
   },
+  getThoughtById({ params }, res) {
+    Thought.findOne({ _id: params.id })
+      .then((dbThoughtData) => {
+        if (!thoughtData) {
+          res
+            .status(404)
+            .json({ message: "There is no thought with this ID" });
+          return;
+        }
+        res.json(thoughtData);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(400).json(err);
+      });
+  },
   // Get a course
   async getSingleThought(req, res) {
     try {
@@ -32,6 +48,13 @@ module.exports = {
       res.json(thought);
       //find user update
       // make a variable follow line 31
+      const user = await User.findOne({ _id: req.params.thoughtId });
+      if (!user) {
+        return res.status(404).json({ message: 'No course with that ID' });
+      }
+
+      res.json(user);
+
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
