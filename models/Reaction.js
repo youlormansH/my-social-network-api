@@ -1,8 +1,8 @@
 const { Schema, Types } = require('mongoose');
 
-const reationsSchema = new Schema(
+const reactionSchema= new Schema(
   {
-    reactiobnId: {
+    reactionId: {
       type: Schema.Types.ObjectId,
       default: () => new Types.ObjectId(),
     },
@@ -10,7 +10,6 @@ const reationsSchema = new Schema(
       type: String,
       required: true,
       maxlength: 280,
-      minlength: 1,
     },
     username: {
       type: String,
@@ -19,6 +18,7 @@ const reationsSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
+      get: timeStamp => dateFormat(timeStamp)
     },
   },
   {
@@ -29,4 +29,4 @@ const reationsSchema = new Schema(
   }
 );
 
-module.exports = reationsSchema;
+module.exports = reactionSchema;

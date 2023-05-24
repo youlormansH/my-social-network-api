@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-const { User } = require('.');
+//const { User } = require('.');
 // const assignmentSchema = require('./Assignment');
 
 // Schema to create Student model
@@ -9,20 +9,24 @@ const userSchema = new Schema(
       type: String,
       required: true,
       max_length: 50,
+      unique: true,
+      trim: true,
     },
     email: {
       type: String,
       required: true,
+      unique: true,
       max_length: 50,
+      match:[/.+@.+\..+/,'Must be an email address'],
     },
     thoughts: [{
-      type: Schema.Types.UserId,
+      type: Schema.Types.ObjectId,
       ref: 'Thought'
     }
   ],
     friends: [
       {
-        type: Schema.Types, UserId,
+        type: Schema.Types.ObjectId,
         ref: 'User'
   }
 ]
@@ -34,6 +38,12 @@ const userSchema = new Schema(
   }
 );
 
-const User = model('user', userSchema);
+userSchema.virtual('friendCount').get(function() {
+  return this.friends.length;
+});
+
+
+
+const User = model('User', userSchema);
 
 module.exports = User;
