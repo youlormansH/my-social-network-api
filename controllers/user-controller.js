@@ -24,37 +24,31 @@ const { User, Thought } = require('../models');
 //     },
 //   ]);
 
-module.exports = {
-  // Get all students
-  async getUsers(req, res) {
+const userController = {
+  //get all users
+async getUsers(req, res) {
     try {
-      const users = await User.find();
+      const dbUserData = await User.find()
+        .select('-__v')
 
-      const userObj = {
-        users,
-        headCount: await headCount(),
-      };
-
-      res.json(userObj);
+      res.json(dbUserData);
     } catch (err) {
       console.log(err);
-      return res.status(500).json(err);
+      res.status(500).json(err);
     }
-  },
-  // Get a single student
+  },  // Get a single student
   async getSingleUser(req, res) {
     try {
-      const user = await User.findOne({ _id: req.params.usersId })
-        .select('-__v');
+      const dbUserData = await User.findOne({ _id: req.params.usersId })
+        .select('-__v')
+        .populate('friends')
+        .populate('thoughts')
 
-      if (!user) {
-        return res.status(404).json({ message: 'No student with that ID' })
+      if (!dbUserData) {
+        return res.status(404).json({ message: 'No user with that ID' });
       }
 
-      res.json({
-        student,
-        grade: await grade(req.params.userId),
-      });
+      res.json(dbUserData);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -63,8 +57,8 @@ module.exports = {
   // create a new student
   async createUser(req, res) {
     try {
-      const user = await User.create(req.body);
-      res.json(user);
+      const dbUserData = await User.create(req.body);
+      res.json(dbUserData);
     } catch (err) {
       res.status(500).json(err);
     }
@@ -72,7 +66,7 @@ module.exports = {
   // Delete a student and remove them from the course
   async deleteUser(req, res) {
     try {
-      const user = await User.findOneAndRemove({ _id: req.params.userId });
+      const use = await User.findOneAndRemove({ _id: req.params.userId });
 
       if (!user) {
         return res.status(404).json({ message: 'No such student exists' });
@@ -103,41 +97,66 @@ module.exports = {
     console.log(req.body);
 
     try {
-      const userData = await User.findOneAndUpdate(
+      const dbUserData = await User.findOneAndUpdate(
         { _id: req.params.userId },
         { $addToSet: { friends: req.params.friendId } },
-        { runValidators: true, new: true }
+        { new: true }
       );
 
-      if (!userData) {
+      if (!dbUserData) {
         return res
           .status(404)
-          .json({ message: 'No student found with that ID :(' });
+          .json({ message: 'No user found with that ID :(' });
       }
 
-      res.json(userData);
+      res.json(dbUserData);
     } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  // update a user
+  async updateUser(req, res) {
+    try {
+      const dbUserData = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        {
+          $set: req.body,
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+
+      if (!dbUserData) {
+        return res.status(404).json({ message: 'No user with this id!' });
+      }
+
+      res.json(dbUserData);
+    } catch (err) {
+      console.log(err);
       res.status(500).json(err);
     }
   },
   // Remove assignment from a student
   async removeFriend(req, res) {
     try {
-      const userData = await User.findOneAndUpdate(
+      const dbUserData = await User.findOneAndUpdate(
         { _id: req.params.friendId },
         { $pull:  { friends: req.params.friendId } },
-        { runValidators: true, new: true }
+        { new: true }
       );
 
-      if (!userData) {
+      if (!dbUserData) {
         return res
           .status(404)
-          .json({ message: 'No student found with that ID :(' });
+          .json({ message: 'No user found with that ID :(' });
       }
 
-      res.json(userData);
+      res.json(dbUserData);
     } catch (err) {
       res.status(500).json(err);
     }
   },
 };
+module.exports = userController
